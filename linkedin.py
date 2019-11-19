@@ -7,6 +7,7 @@ Created on Sun Nov  3 17:37:41 2019
 
 import pandas as pd
 import numpy as np
+from scipy import stats
 import matplotlib.pyplot as plt
 
 # GET DATA BEFORE from csv
@@ -45,19 +46,45 @@ import matplotlib.pyplot as plt
 #delta_followers=companies_end_2017['followers_count']-companies_start_2017['followers_count']
 #delta_employee=companies_end_2017['employees_on_platform']-companies_start_2017['employees_on_platform']
 # get delta followers and delta employess for the top 5 companies (follower wise)
-top_5_delta_followers=np.array([delta_followers['Google'],delta_followers['Microsoft'],
-                       delta_followers['Apple'],delta_followers['IBM'],
-                       delta_followers['Amazon']])
-top_5_delta_employee=np.array([delta_employee['Google'],delta_employee['Microsoft'],
-                       delta_employee['Apple'],delta_employee['IBM'],
-                       delta_employee['Amazon']])
-followers_employee_ratio=top_5_delta_employee/top_5_delta_followers
-top5_companies=['google', 'microsoft','apple','ibm', 'amazon']
-fig2=plt.bar(top5_companies,followers_employee_ratio)
-plt.xlabel('Top 5 Companies with Linkedin Followers')
-plt.ylabel('Employee:Followers Ratio in 2017')
-plt.show()
-                                 
+#top_5_delta_followers=np.array([delta_followers['Google'],delta_followers['Microsoft'],
+#                       delta_followers['Apple'],delta_followers['IBM'],
+#                       delta_followers['Amazon']])
+#top_5_delta_employee=np.array([delta_employee['Google'],delta_employee['Microsoft'],
+#                       delta_employee['Apple'],delta_employee['IBM'],
+#                       delta_employee['Amazon']])
+#followers_employee_ratio=top_5_delta_employee/top_5_delta_followers
+#top5_companies=['google', 'microsoft','apple','ibm', 'amazon']
+#fig2=plt.bar(top5_companies,followers_employee_ratio)
+#plt.xlabel('Top 5 Companies with Linkedin Followers')
+#plt.ylabel('Employee:Followers Ratio in 2017')
+#plt.show()
+
+#######################################################
+# sort data by date
+#sorted_data = raw_data.sort_values(by ='as_of_date' )
+#set 'as_of_date'as index
+#indexed_data=sorted_data.set_index('as_of_date')
+
+
+#group by (company name)
+#companies=sorted_data.groupby(['company_name'])
+# get the last entry for each company
+comp_last=pd.DataFrame(companies.last())
+# get the average number of followeres for each industry at the the last date
+# the data is collected
+industries_avg_fol=comp_last.groupby('industry')['followers_count'].mean()
+# convert the series to dataframe
+industries_avg_fol=pd.DataFrame(industries_avg_fol)
+# reset the index of industries_avg_fol
+industries_avg_fol=industries_avg_fol.reset_index()         
+# round the number of followers to the smallest integer
+industries_avg_fol=industries_avg_fol.astype({'followers_count':int})
+# get the z score for the averages   
+zscores=np.array(stats.zscore(industries_avg_fol['followers_count'])) 
+# get the total number of followers in all industries
+industries_sum_fol=pd.DataFrame(comp_last.groupby('industry')['followers_count'].sum())
+# reset the index of industries_max_fol
+industries_sum_fol=industries_sum_fol.reset_index()                    
                                  
                                  
                                  
